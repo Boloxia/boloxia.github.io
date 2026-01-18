@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Progress Tracker</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+        width: 100%;
+        background: #ddd;
+        border-radius: 20px;
+        overflow: hidden;
+        height: 30px;
+        margin-top: 20px;
+    }
+
+    .progress {
+        height: 100%;
+        background: #4caf50;
+        width: 0%;
+        transition: width 0.5s;
+    }
+
+    .info {
+        margin-top: 12px;
+        font-size: 14px;
+    }
+
+    button {
+        margin-top: 15px;
+        padding: 8px 14px;
+        cursor: pointer;
+    }
+
+    .settings {
+        display: none;
+        margin-top: 10px;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2 id="title"></h2>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="info" id="remaining"></div>
+    <div class="info" id="weeks"></div>
+    <div class="info" id="updated"></div>
+
+    <button onclick="toggleSettings()">⚙️ Settings</button>
+
+    <div class="settings" id="settings">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en">English</option>
+            <option value="it">Italiano</option>
+            <option value="es">Español</option>
+        </select>
+    </div>
+</div>
+
+<script>
+/* ---------- TRANSLATIONS ---------- */
+const t = {
+    en: {
+        title: "Progress Tracker",
+        remaining: "Days remaining",
+        weeks: "Weeks remaining",
+        updated: "Last update"
+    },
+    it: {
+        title: "Avanzamento",
+        remaining: "Giorni rimanenti",
+        weeks: "Settimane rimanenti",
+        updated: "Ultimo aggiornamento"
+    },
+    es: {
+        title: "Progreso",
+        remaining: "Días restantes",
+        weeks: "Semanas restantes",
+        updated: "Última actualización"
+    }
+};
+
+/* ---------- LANGUAGE ---------- */
+let lang = localStorage.getItem("lang");
+if (!lang) {
+    lang = navigator.language.slice(0,2);
+    if (!t[lang]) lang = "en";
+    localStorage.setItem("lang", lang);
+}
+
+/* ---------- DATE LOGIC ---------- */
+const endDate = new Date("2026-06-02");
+const startDate = new Date();
+startDate.setHours(0,0,0,0);
+endDate.setHours(0,0,0,0);
+
+const today = new Date();
+today.setHours(0,0,0,0);
+
+const totalDays = (endDate - startDate) / 86400000;
+const remainingDays = Math.max((endDate - today) / 86400000, 0);
+const weeksRemaining = Math.ceil(remainingDays / 7);
+const percent = Math.round(((totalDays - remainingDays) / totalDays) * 100);
+
+/* ---------- UI ---------- */
+function updateUI() {
+    document.documentElement.lang = lang;
+    document.getElementById("languageSelect").value = lang;
+    document.getElementById("title").innerText = t[lang].title;
+    document.getElementById("progress").style.width = percent + "%";
+
+    document.getElementById("remaining").innerText =
+        `${t[lang].remaining}: ${Math.floor(remainingDays)}`;
+
+    document.getElementById("weeks").innerText =
+        `${t[lang].weeks}: ${weeksRemaining}`;
+
+    document.getElementById("updated").innerText =
+        `${t[lang].updated}: ${today.toLocaleDateString(lang)}`;
+}
+
+function toggleSettings() {
+    const s = document.getElementById("settings");
+    s.style.display = s.style.display === "none" ? "block" : "none";
+}
+
+function changeLanguage(l) {
+    lang = l;
+    localStorage.setItem("lang", lang);
+    updateUI();
+}
+
+updateUI();
+</script>
+</body>
+</html>
